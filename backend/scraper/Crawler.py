@@ -642,44 +642,9 @@ class CSESFetcher(OnlineJudgeFetcher):
         return raw_data
 
 class LeetCodeFetcher(OnlineJudgeFetcher):
-    def fetch(self) -> List[Submission]:
+    def _get_authenticated_session(self) -> requests.Session:
         BASE_URL = 'https://leetcode.com'
-        lang_d = {
-            "cpp": "C++",
-            "c": "C",
-            "java": "Java",
-            "python": "Python",
-            "python3": "Python",
-            "csharp": "C#",
-            "javascript": "JavaScript",
-            "typescript": "TypeScript",
-            "php": "PHP",
-            "swift": "Swift",
-            "kotlin": "Kotlin",
-            "dart": "Dart",
-            "go": "Go",
-            "ruby": "Ruby",
-            "scala": "Scala",
-            "rust": "Rust"
-        }
         
-        result_d = {
-            "10": "AC",
-            "11": "WA",
-            "12": "MLE",
-            "13": "RE",
-            "14": "TLE",
-            "15": "TLE",
-            "20": "CE",
-            "21": "Unknown Error",
-            "Accepted": "AC",
-            "Wrong Answer": "WA",
-            "Time Limit Exceeded": "TLE",
-            "Memory Limit Exceeded": "MLE",
-            "Runtime Error": "RE",
-            "Compile Error": "CE"
-        }
-
         question_query = """
         query userProgressQuestionList($filters: UserProgressQuestionListInput) {
             userProgressQuestionList(filters: $filters) {
@@ -689,24 +654,6 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                     title
                     titleSlug
                 }
-            }
-        }
-        """
-
-        submission_query = """
-        query userProgressSubmissionList($offset: Int!, $limit: Int!, $questionSlug: String!) {
-            userProgressSubmissionList(
-                offset: $offset
-                limit: $limit
-                questionSlug: $questionSlug
-            ) {
-                submissions {
-                    id
-                    status
-                    langName
-                    timestamp
-                }
-                totalNum
             }
         }
         """
@@ -805,6 +752,79 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                 'Referer': f"{BASE_URL}/progress/"
             })
 
+        return loggin_session
+
+    def fetch(self) -> List[Submission]:
+        BASE_URL = 'https://leetcode.com'
+        lang_d = {
+            "cpp": "C++",
+            "c": "C",
+            "java": "Java",
+            "python": "Python",
+            "python3": "Python",
+            "csharp": "C#",
+            "javascript": "JavaScript",
+            "typescript": "TypeScript",
+            "php": "PHP",
+            "swift": "Swift",
+            "kotlin": "Kotlin",
+            "dart": "Dart",
+            "go": "Go",
+            "ruby": "Ruby",
+            "scala": "Scala",
+            "rust": "Rust"
+        }
+        
+        result_d = {
+            "10": "AC",
+            "11": "WA",
+            "12": "MLE",
+            "13": "RE",
+            "14": "TLE",
+            "15": "TLE",
+            "20": "CE",
+            "21": "Unknown Error",
+            "Accepted": "AC",
+            "Wrong Answer": "WA",
+            "Time Limit Exceeded": "TLE",
+            "Memory Limit Exceeded": "MLE",
+            "Runtime Error": "RE",
+            "Compile Error": "CE"
+        }
+
+        question_query = """
+        query userProgressQuestionList($filters: UserProgressQuestionListInput) {
+            userProgressQuestionList(filters: $filters) {
+                totalNum
+                questions {
+                    frontendId
+                    title
+                    titleSlug
+                }
+            }
+        }
+        """
+
+        submission_query = """
+        query userProgressSubmissionList($offset: Int!, $limit: Int!, $questionSlug: String!) {
+            userProgressSubmissionList(
+                offset: $offset
+                limit: $limit
+                questionSlug: $questionSlug
+            ) {
+                submissions {
+                    id
+                    status
+                    langName
+                    timestamp
+                }
+                totalNum
+            }
+        }
+        """
+
+        loggin_session = self._get_authenticated_session()
+
         # 3. 正式抓取 GraphQL 資料
         raw_data = list()
 
@@ -889,3 +909,54 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
             sleep(randint(5, 10) / 10.0) # sleep 0.5 ~ 1 sec
 
         return raw_data
+
+    @property
+    def supports_code_fetch(self) -> bool:
+        return True
+
+    def fetch_code(self, submission_id: int) -> Optional[str]:
+        loggin_session = self._get_authenticated_session()
+        BASE_URL = 'https://leetcode.com'
+
+        query = """
+        query submissionDetails($submissionId: Int!) {
+            submissionDetails(submissionId: $submissionId) {
+                code
+            }
+        }
+        """
+
+        payload = {
+            "query": query,
+            "variables": {
+                "submissionId": submission_id
+            },
+            "operationName": "submissionDetails"
+        }
+
+        while True:
+            try:
+                res = loggin_session.post(f"{BASE_URL}/graphql/", json=payload)
+                
+                if res.status_code == 429:
+                    wait_time = uniform(3, 5)
+                    logging.warning(f"LeetCode code fetch 429 Rate Limit hit. Waiting for {wait_time:.2f} seconds...")
+                    sleep(wait_time)
+                    continue
+                
+                if res.status_code != 200:
+                    logging.error(f"<LeetCode> Failed to fetch code for submission {submission_id}: HTTP {res.status_code}")
+                    return None
+
+                data = res.json()
+                details = data.get("data", {}).get("submissionDetails") or data.get("submissionDetails")
+                
+                if not details or not details.get("code"):
+                    logging.warning(f"<LeetCode> No code found in response for submission {submission_id}")
+                    return None
+
+                return details.get("code")
+
+            except Exception as e:
+                logging.error(f"<LeetCode> Error fetching code for submission {submission_id}: {e}")
+                return None

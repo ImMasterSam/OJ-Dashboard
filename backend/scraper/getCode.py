@@ -35,12 +35,11 @@ def getCode():
     # 建立支援 code fetch 的 fetcher 字典（OJ 名稱 -> fetcher 實例）
     fetcher_map = {
         "Zerojudge": Crawler.ZerojudgeFetcher(user_data.get('Zerojudge', {})),
-        # 未來在此新增其他 OJ 的 fetcher
         # "TOJ": Crawler.TOJFetcher(user_data.get('TOJ', {})),
         # "AtCoder": Crawler.AtCoderFetcher(user_data.get('AtCoder', {})),
         # "CodeForces": Crawler.CodeForcesFetcher(user_data.get('CodeForces', {})),
         # "CSES": Crawler.CSESFetcher(user_data.get('CSES', {})),
-        # "LeetCode": Crawler.LeetCodeFetcher(user_data.get('LeetCode', {})),
+        "LeetCode": Crawler.LeetCodeFetcher(user_data.get('LeetCode', {})),
         # "Kattis": Crawler.KattisFetcher(user_data.get('Kattis', {})),
     }
 
