@@ -377,7 +377,16 @@ class TOJFetcher(OnlineJudgeFetcher):
             logging.critical('Unable to find Chrome Driver !!!')
             raise WebDriverException
 
-        result_d = {"Accepted":"AC", "Wrong Answer":"WA", "Compile Error":"CE", "Runtime Error":"RE", "Time Limit Exceed":"TLE", "Memory Limit Exceed":"MLE"}
+        result_d = {
+            "Accepted":"AC",
+            "Wrong Answer":"WA",
+            "Partial Correct": "WA",
+            "Compile Error":"CE", 
+            "Runtime Error":"RE", 
+            "Time Limit Exceed":"TLE", 
+            "Memory Limit Exceed":"MLE",
+            "Runtime Error (Killed by signal)" : "RE"
+        }
         raw_data = list()
 
         pageoff = 0
@@ -387,14 +396,14 @@ class TOJFetcher(OnlineJudgeFetcher):
         with open("data/Json/Proset.json") as f:
             proset_d = json.load(f)
 
-        test_res = requests.get(f"https://toj.tfcis.org/oj/chal/?acctid={self.config['UserId']}")
+        test_res = requests.get(f"https://toj.tfcis.org/oj/chal/?acct_id={self.config['UserId']}")
         if(test_res.status_code != 200):
             logging.error('<TOJ> : Unable to connect to the TOJ :(')
             raise ConnectionError("Unable to connect to the TOJ :(")
 
         while True:
             
-            url = f"https://toj.tfcis.org/oj/chal/?pageoff={pageoff}&acctid={self.config['UserId']}"
+            url = f"https://toj.tfcis.org/oj/chal/?pageoff={pageoff}&acct_id={self.config['UserId']}"
             browser.get(url)
             sleep(1)  # 等待頁面載入
 
@@ -699,12 +708,14 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                             "skip": 0,
                             "limit": 1
                         }
-                    }
+                    },
+                    "operationName": "userProgressQuestionList"
                 }
                 res = loggin_session.post(f"{BASE_URL}/graphql/", json=payload)
                 if res.status_code == 200:
                     data = res.json()
-                    if "errors" not in data and "data" in data and "userProgressQuestionList" in data["data"]:
+                    data_obj = data.get("data") or {}
+                    if "errors" not in data and data_obj.get("userProgressQuestionList") is not None:
                         is_cookie_valid = True
                         logging.info("LeetCode cookies validation passed.")
         except Exception as e:
@@ -811,9 +822,20 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
             userProgressQuestionList(filters: $filters) {
                 totalNum
                 questions {
+                    translatedTitle
                     frontendId
                     title
                     titleSlug
+                    difficulty
+                    lastSubmittedAt
+                    numSubmitted
+                    questionStatus
+                    lastResult
+                    topicTags {
+                        name
+                        nameTranslated
+                        slug
+                    }
                 }
             }
         }
@@ -854,7 +876,8 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                         "skip": skip,
                         "limit": limit
                     }
-                }
+                },
+                "operationName": "userProgressQuestionList"
             }
             res = loggin_session.post(f"{BASE_URL}/graphql/", json=payload)
             if res.status_code == 429:
@@ -866,13 +889,22 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                 break
                 
             data = res.json()
-            q_list = data.get("data", {}).get("userProgressQuestionList", {}).get("questions", [])
+            data_content = data.get("data") or {}
+            user_progress = data_content.get("userProgressQuestionList") or {}
+            q_list = user_progress.get("questions") or []
+            
             if not q_list:
+                if skip == 0:
+                    logging.warning(f"No questions found or API error. Response: {data}")
+                else:
+                    logging.info("Finished fetching all questions.")
                 break
                 
             questions.extend(q_list)
             skip += limit
             sleep(randint(5, 10) / 10.0)
+
+        logging.info(f"Total {len(questions)} questions fetched.")
 
         # 針對每題抓取 submissions
         for q in questions:

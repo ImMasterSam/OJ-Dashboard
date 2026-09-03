@@ -27,27 +27,33 @@ def init_supabase_client(config: dict) -> Client:
         
     return create_client(url, key)
 
-if __name__ == "__main__":
-    # --- 整合測試與上傳區塊 ---
-    
-    # 1. 讀取設定
+def sync_all_to_supabase():
+    """整合讀取設定與上傳資料的完整流程"""
     supabase_config = load_supabase_config()
-    
+    if not supabase_config:
+        print("未載入 Supabase 設定，跳過上傳。")
+        return
+
     try:
-        # 2. 初始化客戶端
         supabase_client = init_supabase_client(supabase_config)
-        
-        # 3. 使用 SubmissionStore 載入並上傳資料
         from services.submission_store import SubmissionStore
         store = SubmissionStore()
         
-        print("正在載入資料...")
+        print("正在載入資料準備上傳...")
         submissions_data = store.load()
-        print(f"成功讀取 {len(submissions_data)} 筆提交紀錄。")
-        
-        print("開始將資料上傳至 Supabase...")
+        if not submissions_data:
+            print("沒有資料可供上傳。")
+            return
+            
+        print(f"成功讀取 {len(submissions_data)} 筆提交紀錄。開始上傳至 Supabase...")
         store.sync_to_cloud(supabase_client, submissions_data)
+        print("Supabase 同步完成！")
         
     except ValueError as e:
         print(f"設定錯誤: {e}")
         print("請確認已經在 settings.json 中填入正確的 Supabase 憑證。")
+    except Exception as e:
+        print(f"上傳過程中發生錯誤: {e}")
+
+if __name__ == "__main__":
+    sync_all_to_supabase()
