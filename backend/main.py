@@ -8,10 +8,11 @@ import logging.handlers
 
 from scraper.getSubmissions import getSubs
 from scraper.getCode import getCode
+from services.upload_to_supabase import sync_all_to_supabase
 
 STARTUP_DELAY = 0           # (Seconds)
-CHECK_INTERVAL = 10         # (Minutes)
-CODE_CHECK_INTERVAL = 1     # (Hours) - 程式碼補抓的間隔
+CHECK_INTERVAL = 12         # (Minutes)
+CODE_CHECK_INTERVAL = 24    # (Hours) - 程式碼補抓的間隔
 LOG_INTERVAL = 1            # (Hours)
 LOGGER_BACKUP = 10000
 log2console = False
@@ -42,12 +43,16 @@ if __name__ == "__main__":
     # 延長啟動時間
     sleep(STARTUP_DELAY)
 
+    def get_subs_and_sync():
+        getSubs()
+        sync_all_to_supabase()
+
     # 初次執行爬蟲（metadata + code backfill）
-    getSubs()
+    get_subs_and_sync()
     getCode()
 
     # 每 {CHECK_INTERVAL} 分鐘抓取 submission metadata
-    schedule.every(CHECK_INTERVAL).minutes.do(getSubs)
+    schedule.every(CHECK_INTERVAL).hours.do(get_subs_and_sync)
 
     # 每 {CODE_CHECK_INTERVAL} 小時補抓程式碼
     schedule.every(CODE_CHECK_INTERVAL).hours.do(getCode)

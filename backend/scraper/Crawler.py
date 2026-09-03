@@ -136,7 +136,7 @@ class ZerojudgeFetcher(OnlineJudgeFetcher):
         # chrome_options.add_argument('--user-data-dir=C:/Users/USER/AppData/Local/Google/Chrome/User Data') # 使用 Chrome 的使用者資料
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
 
         # 啟動 Webdriver
         try:
@@ -155,22 +155,36 @@ class ZerojudgeFetcher(OnlineJudgeFetcher):
         username.send_keys(self.config['Username'])
         password.send_keys(self.config['Password'])
         loginButton = browser.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div[2]/form/button[1]')
-        sleep(3)
+        
+        print("=========================================================")
+        print("若遇到 Zerojudge 的 reCAPTCHA 驗證，請手動在彈出的瀏覽器中完成。")
+        print("程式將會等待您完成驗證並登入後自動繼續 (最多等待 2 分鐘)...")
+        print("=========================================================")
+        
+        sleep(1)
         loginButton.click()
 
         # 可以用 Chrome 的資料直接用 Google 登入 (現在暫時不需要)
         # Google = browser.find_element(By.XPATH,'/html[1]/body[1]/div[4]/div[2]/div[2]/a[1]')
         # Google.click()
 
-        sleep(3)  # 等待頁面載入
-
-        # 檢查是否登入成功
-        if browser.current_url == "https://zerojudge.tw/Login":
+        # 等待頁面跳轉 (離開 Login 頁面) 或逾時
+        timeout = 120
+        elapsed = 0
+        while "Login" in browser.current_url:
             sleep(2)
-            error_message = browser.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[2]/form/div[1]').text
-            print(f"ERROR: Unable to login Zerojudge !!! ({error_message})")
-            logging.error(f"Unable to login Zerojudge !!! ({error_message})")
-            raise ValueError(f"Unable to login Zerojudge !!! ({error_message})")
+            elapsed += 2
+            if elapsed >= timeout:
+                try:
+                    error_message = browser.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[2]/form/div[1]').text
+                except Exception:
+                    error_message = "無法登入且未取得錯誤訊息"
+                
+                error_msg = f"登入 Zerojudge 逾時 (超過 2 分鐘)，最後狀態: {error_message}"
+                print(f"ERROR: {error_msg}")
+                logging.error(error_msg)
+                browser.quit()
+                raise TimeoutError(error_msg)
 
         # 進入使用者解題統計頁面（確保 cookie 完整）
         browser.get("https://zerojudge.tw/UserStatistic")
@@ -363,7 +377,16 @@ class TOJFetcher(OnlineJudgeFetcher):
             logging.critical('Unable to find Chrome Driver !!!')
             raise WebDriverException
 
-        result_d = {"Accepted":"AC", "Wrong Answer":"WA", "Compile Error":"CE", "Runtime Error":"RE", "Time Limit Exceed":"TLE", "Memory Limit Exceed":"MLE"}
+        result_d = {
+            "Accepted":"AC",
+            "Wrong Answer":"WA",
+            "Partial Correct": "WA",
+            "Compile Error":"CE", 
+            "Runtime Error":"RE", 
+            "Time Limit Exceed":"TLE", 
+            "Memory Limit Exceed":"MLE",
+            "Runtime Error (Killed by signal)" : "RE"
+        }
         raw_data = list()
 
         pageoff = 0
@@ -373,14 +396,14 @@ class TOJFetcher(OnlineJudgeFetcher):
         with open("data/Json/Proset.json") as f:
             proset_d = json.load(f)
 
-        test_res = requests.get(f"https://toj.tfcis.org/oj/chal/?acctid={self.config['UserId']}")
+        test_res = requests.get(f"https://toj.tfcis.org/oj/chal/?acct_id={self.config['UserId']}")
         if(test_res.status_code != 200):
             logging.error('<TOJ> : Unable to connect to the TOJ :(')
             raise ConnectionError("Unable to connect to the TOJ :(")
 
         while True:
             
-            url = f"https://toj.tfcis.org/oj/chal/?pageoff={pageoff}&acctid={self.config['UserId']}"
+            url = f"https://toj.tfcis.org/oj/chal/?pageoff={pageoff}&acct_id={self.config['UserId']}"
             browser.get(url)
             sleep(1)  # 等待頁面載入
 
@@ -642,44 +665,9 @@ class CSESFetcher(OnlineJudgeFetcher):
         return raw_data
 
 class LeetCodeFetcher(OnlineJudgeFetcher):
-    def fetch(self) -> List[Submission]:
+    def _get_authenticated_session(self) -> requests.Session:
         BASE_URL = 'https://leetcode.com'
-        lang_d = {
-            "cpp": "C++",
-            "c": "C",
-            "java": "Java",
-            "python": "Python",
-            "python3": "Python",
-            "csharp": "C#",
-            "javascript": "JavaScript",
-            "typescript": "TypeScript",
-            "php": "PHP",
-            "swift": "Swift",
-            "kotlin": "Kotlin",
-            "dart": "Dart",
-            "go": "Go",
-            "ruby": "Ruby",
-            "scala": "Scala",
-            "rust": "Rust"
-        }
         
-        result_d = {
-            "10": "AC",
-            "11": "WA",
-            "12": "MLE",
-            "13": "RE",
-            "14": "TLE",
-            "15": "TLE",
-            "20": "CE",
-            "21": "Unknown Error",
-            "Accepted": "AC",
-            "Wrong Answer": "WA",
-            "Time Limit Exceeded": "TLE",
-            "Memory Limit Exceeded": "MLE",
-            "Runtime Error": "RE",
-            "Compile Error": "CE"
-        }
-
         question_query = """
         query userProgressQuestionList($filters: UserProgressQuestionListInput) {
             userProgressQuestionList(filters: $filters) {
@@ -689,24 +677,6 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                     title
                     titleSlug
                 }
-            }
-        }
-        """
-
-        submission_query = """
-        query userProgressSubmissionList($offset: Int!, $limit: Int!, $questionSlug: String!) {
-            userProgressSubmissionList(
-                offset: $offset
-                limit: $limit
-                questionSlug: $questionSlug
-            ) {
-                submissions {
-                    id
-                    status
-                    langName
-                    timestamp
-                }
-                totalNum
             }
         }
         """
@@ -738,12 +708,14 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                             "skip": 0,
                             "limit": 1
                         }
-                    }
+                    },
+                    "operationName": "userProgressQuestionList"
                 }
                 res = loggin_session.post(f"{BASE_URL}/graphql/", json=payload)
                 if res.status_code == 200:
                     data = res.json()
-                    if "errors" not in data and "data" in data and "userProgressQuestionList" in data["data"]:
+                    data_obj = data.get("data") or {}
+                    if "errors" not in data and data_obj.get("userProgressQuestionList") is not None:
                         is_cookie_valid = True
                         logging.info("LeetCode cookies validation passed.")
         except Exception as e:
@@ -805,6 +777,90 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                 'Referer': f"{BASE_URL}/progress/"
             })
 
+        return loggin_session
+
+    def fetch(self) -> List[Submission]:
+        BASE_URL = 'https://leetcode.com'
+        lang_d = {
+            "cpp": "C++",
+            "c": "C",
+            "java": "Java",
+            "python": "Python",
+            "python3": "Python",
+            "csharp": "C#",
+            "javascript": "JavaScript",
+            "typescript": "TypeScript",
+            "php": "PHP",
+            "swift": "Swift",
+            "kotlin": "Kotlin",
+            "dart": "Dart",
+            "go": "Go",
+            "ruby": "Ruby",
+            "scala": "Scala",
+            "rust": "Rust"
+        }
+        
+        result_d = {
+            "10": "AC",
+            "11": "WA",
+            "12": "MLE",
+            "13": "RE",
+            "14": "TLE",
+            "15": "TLE",
+            "20": "CE",
+            "21": "Unknown Error",
+            "Accepted": "AC",
+            "Wrong Answer": "WA",
+            "Time Limit Exceeded": "TLE",
+            "Memory Limit Exceeded": "MLE",
+            "Runtime Error": "RE",
+            "Compile Error": "CE"
+        }
+
+        question_query = """
+        query userProgressQuestionList($filters: UserProgressQuestionListInput) {
+            userProgressQuestionList(filters: $filters) {
+                totalNum
+                questions {
+                    translatedTitle
+                    frontendId
+                    title
+                    titleSlug
+                    difficulty
+                    lastSubmittedAt
+                    numSubmitted
+                    questionStatus
+                    lastResult
+                    topicTags {
+                        name
+                        nameTranslated
+                        slug
+                    }
+                }
+            }
+        }
+        """
+
+        submission_query = """
+        query userProgressSubmissionList($offset: Int!, $limit: Int!, $questionSlug: String!) {
+            userProgressSubmissionList(
+                offset: $offset
+                limit: $limit
+                questionSlug: $questionSlug
+            ) {
+                submissions {
+                    id
+                    status
+                    langName
+                    timestamp
+                }
+                totalNum
+            }
+        }
+        """
+
+        loggin_session = self._get_authenticated_session()
+
         # 3. 正式抓取 GraphQL 資料
         raw_data = list()
 
@@ -820,7 +876,8 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                         "skip": skip,
                         "limit": limit
                     }
-                }
+                },
+                "operationName": "userProgressQuestionList"
             }
             res = loggin_session.post(f"{BASE_URL}/graphql/", json=payload)
             if res.status_code == 429:
@@ -832,13 +889,22 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
                 break
                 
             data = res.json()
-            q_list = data.get("data", {}).get("userProgressQuestionList", {}).get("questions", [])
+            data_content = data.get("data") or {}
+            user_progress = data_content.get("userProgressQuestionList") or {}
+            q_list = user_progress.get("questions") or []
+            
             if not q_list:
+                if skip == 0:
+                    logging.warning(f"No questions found or API error. Response: {data}")
+                else:
+                    logging.info("Finished fetching all questions.")
                 break
                 
             questions.extend(q_list)
             skip += limit
             sleep(randint(5, 10) / 10.0)
+
+        logging.info(f"Total {len(questions)} questions fetched.")
 
         # 針對每題抓取 submissions
         for q in questions:
@@ -889,3 +955,54 @@ class LeetCodeFetcher(OnlineJudgeFetcher):
             sleep(randint(5, 10) / 10.0) # sleep 0.5 ~ 1 sec
 
         return raw_data
+
+    @property
+    def supports_code_fetch(self) -> bool:
+        return True
+
+    def fetch_code(self, submission_id: int) -> Optional[str]:
+        loggin_session = self._get_authenticated_session()
+        BASE_URL = 'https://leetcode.com'
+
+        query = """
+        query submissionDetails($submissionId: Int!) {
+            submissionDetails(submissionId: $submissionId) {
+                code
+            }
+        }
+        """
+
+        payload = {
+            "query": query,
+            "variables": {
+                "submissionId": submission_id
+            },
+            "operationName": "submissionDetails"
+        }
+
+        while True:
+            try:
+                res = loggin_session.post(f"{BASE_URL}/graphql/", json=payload)
+                
+                if res.status_code == 429:
+                    wait_time = uniform(3, 5)
+                    logging.warning(f"LeetCode code fetch 429 Rate Limit hit. Waiting for {wait_time:.2f} seconds...")
+                    sleep(wait_time)
+                    continue
+                
+                if res.status_code != 200:
+                    logging.error(f"<LeetCode> Failed to fetch code for submission {submission_id}: HTTP {res.status_code}")
+                    return None
+
+                data = res.json()
+                details = data.get("data", {}).get("submissionDetails") or data.get("submissionDetails")
+                
+                if not details or not details.get("code"):
+                    logging.warning(f"<LeetCode> No code found in response for submission {submission_id}")
+                    return None
+
+                return details.get("code")
+
+            except Exception as e:
+                logging.error(f"<LeetCode> Error fetching code for submission {submission_id}: {e}")
+                return None
