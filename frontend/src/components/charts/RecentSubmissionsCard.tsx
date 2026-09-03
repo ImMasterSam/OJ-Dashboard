@@ -1,6 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { SubsContext } from '../../context/SubsContext';
 import { RecentSubmissionsSkeleton } from '../ChartPlaceholders';
+import styles from '../../css/RecentSubmissionsCard.module.css';
 
 export default function RecentSubmissionsCard({ className = '' }: { className?: string }) {
   const { data, filteredData, loading, error } = useContext(SubsContext);
@@ -54,11 +55,11 @@ export default function RecentSubmissionsCard({ className = '' }: { className?: 
       <h2 className="chart-title">近期提交紀錄</h2>
 
       {error ? (
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-wa)' }}>
+        <div className={styles.errorState}>
           無法載入資料: {error}
         </div>
       ) : recentSubs.length === 0 ? (
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <div className={styles.emptyState}>
           目前沒有任何提交紀錄
         </div>
       ) : (
@@ -66,42 +67,39 @@ export default function RecentSubmissionsCard({ className = '' }: { className?: 
           <table className="recent-subs-table">
             <thead>
               <tr>
-                <th style={{ whiteSpace: 'nowrap', width: '1%' }}>解題網站</th>
+                <th className={styles.headerCellNarrow}>解題網站</th>
                 <th>題目名稱</th>
-                <th style={{ whiteSpace: 'nowrap', width: '1%' }}>完成時間</th>
+                <th className={styles.headerCellNarrow}>完成時間</th>
               </tr>
             </thead>
             <tbody>
               {recentSubs.map((sub, idx) => (
                 <tr key={`${sub['題目名稱']}-${sub['完成時間']}-${idx}`}>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className={styles.logoCell}>
                       <img
                         src={`./OJ logos/${sub['網站']}.png`}
                         alt={sub['網站']}
                         title={sub['網站']}
-                        style={{ height: '24px' }}
+                        className={styles.logoImage}
                       />
                     </div>
                   </td>
                   <td
-                    className="title-cell"
+                    className={`title-cell ${styles.titleCell}`}
                     title={`[${sub['結果']}] ${sub['題目名稱']}`}
-                    style={{
-                      width: '100%',
-                      borderRight: `4px solid ${getVerdictColor(sub['結果'])}`
-                    }}
+                    style={{ '--verdict-color': getVerdictColor(sub['結果']) } as React.CSSProperties}
                   >
                     <a
                       href={sub['網址']}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: 'inherit', textDecoration: 'none' }}
+                      className={styles.titleLink}
                     >
                       {sub['題目名稱']}
                     </a>
                   </td>
-                  <td style={{ color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+                  <td className={styles.dateCell}>
                     {formatDate(sub['完成時間'])}
                   </td>
                 </tr>

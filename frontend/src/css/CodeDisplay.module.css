@@ -1,0 +1,104 @@
+/* CodeDisplay Module */
+
+/* Main container */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #1E1E1E !important;
+  padding: 0;
+}
+
+/* Code header bar */
+.header {
+  background: #252526;
+  padding: 12px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerTitle {
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.languageBadge {
+  font-size: 0.75rem;
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Code body area */
+.body {
+  flex: 1;
+  background: rgba(30, 30, 30, 0.5);
+  overflow: auto;
+}
+
+/* Placeholder: no submission selected */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.1rem;
+  padding: 24px;
+}
+
+/* Placeholder: platform not supported */
+.unsupported {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 3rem;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.unsupportedIcon {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 1.25rem;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.unsupportedIconSvg {
+  opacity: 0.8;
+  color: #a0a0a0;
+}
+
+.unsupportedTitle {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.unsupportedText {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+.unsupportedHighlight {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}

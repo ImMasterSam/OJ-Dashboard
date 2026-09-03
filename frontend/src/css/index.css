@@ -252,37 +252,8 @@ h4,
   min-height: 0;
 }
 
-/* Code Card */
-.code-card {
-  background: #1E1E1E !important;
-  /* typical dark editor background */
-  padding: 0;
-  overflow: hidden;
-}
-
-.code-header {
-  background: #252526;
-  padding: 12px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.code-content {
-  padding: 24px;
-  overflow-y: auto;
-  height: calc(100% - 45px);
-  /* rough header height */
-  margin: 0;
-}
-
-.code-content code {
-  font-family: 'Fira Code', 'Courier New', Courier, monospace;
-  font-size: 0.95rem;
-  color: #D4D4D4;
-  /* VSCode standard text color */
+/* Chart Title */
+.chart-title {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
 }

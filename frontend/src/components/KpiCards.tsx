@@ -1,4 +1,4 @@
-import '../css/KpiCards.css';
+import styles from '../css/KpiCards.module.css';
 import { useSubsData } from '../hooks/useSubsData';
 
 export default function KpiCards() {
@@ -12,7 +12,7 @@ export default function KpiCards() {
   };
 
   return (
-    <div className="kpi-cards-container">
+    <div className={styles.container}>
       <KpiCard label="AC" value={formatValue(data?.ac)} color="var(--color-ac)" />
       <KpiCard label="WA" value={formatValue(data?.wa)} color="var(--color-wa)" />
       <KpiCard label="TLE" value={formatValue(data?.tle)} color="var(--color-tle)" />
@@ -22,15 +22,15 @@ export default function KpiCards() {
 
 function KpiCard({ label, value, color }: { label: string, value: string, color: string }) {
   return (
-    <div className="glass-card kpi-card" style={{ borderTop: `4px solid ${color}`, minWidth: '200px' }}>
-      <div
-        className="kpi-card-glow"
-        style={{ background: `linear-gradient(180deg, ${color}33 0%, transparent 100%)` }}
-      ></div>
-      <div className="display-number kpi-card-value" style={{ color: color }}>
+    <div
+      className={`glass-card ${styles.card}`}
+      style={{ '--card-color': color, '--card-color-alpha': `${color}33` } as React.CSSProperties}
+    >
+      <div className={styles.glow}></div>
+      <div className={`display-number ${styles.value}`}>
         {value}
       </div>
-      <div className="kpi-card-label">
+      <div className={styles.label}>
         {label}
       </div>
     </div>

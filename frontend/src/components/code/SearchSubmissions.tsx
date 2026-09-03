@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSubsData } from '../../hooks/useSubsData';
 import { Code } from 'lucide-react';
+import styles from '../../css/SearchSubmissions.module.css';
 
 function WebsiteLogo({ website }: { website?: string }) {
   const [error, setError] = useState(false);
@@ -13,7 +14,7 @@ function WebsiteLogo({ website }: { website?: string }) {
     <img
       src={`./OJ logos/${website}.png`}
       alt={website}
-      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+      className={styles.logoImage}
       onError={() => setError(true)}
     />
   );
@@ -73,93 +74,72 @@ export default function SearchSubmissions({ selectedSubmission, onSelect }: Sear
   const recentSubmissions = filteredSubmissions.slice(0, 20);
 
   return (
-    <div className="glass-card col-span-4" style={{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '12px' }}>Search Submissions</h2>
+    <div className={`glass-card col-span-4 ${styles.container}`}>
+      <h2 className={styles.title}>Search Submissions</h2>
 
       {/* Top 2x2 Grid Filters */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px', flexShrink: 0 }}>
+      <div className={styles.filterGrid}>
         <select 
           value={websiteFilter} 
           onChange={e => setWebsiteFilter(e.target.value)}
-          style={{ padding: '8px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', outline: 'none' }}
+          className={styles.filterInput}
         >
-          <option value="" style={{ color: 'black' }}>All Websites</option>
-          {websites.map(w => <option key={w} value={w} style={{ color: 'black' }}>{w}</option>)}
+          <option value="">All Websites</option>
+          {websites.map(w => <option key={w} value={w}>{w}</option>)}
         </select>
         <select 
           value={verdictFilter} 
           onChange={e => setVerdictFilter(e.target.value)}
-          style={{ padding: '8px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', outline: 'none' }}
+          className={styles.filterInput}
         >
-          <option value="" style={{ color: 'black' }}>All Verdicts</option>
-          {verdicts.map(v => <option key={v} value={v} style={{ color: 'black' }}>{v}</option>)}
+          <option value="">All Verdicts</option>
+          {verdicts.map(v => <option key={v} value={v}>{v}</option>)}
         </select>
         <input 
           type="datetime-local" 
           value={startTimeFilter} 
           onChange={e => setStartTimeFilter(e.target.value)}
           title="Start Time"
-          style={{ padding: '8px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', outline: 'none', colorScheme: 'dark' }}
+          className={styles.filterInput}
         />
         <input 
           type="datetime-local" 
           value={endTimeFilter} 
           onChange={e => setEndTimeFilter(e.target.value)}
           title="End Time"
-          style={{ padding: '8px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', outline: 'none', colorScheme: 'dark' }}
+          className={styles.filterInput}
         />
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div className={styles.listContainer}>
         {recentSubmissions.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '8px' }}>
+          <div className={styles.list}>
             {recentSubmissions.map((sub, idx) => (
               <div
                 key={idx}
                 onClick={() => onSelect(sub)}
-                style={{
-                  padding: '12px',
-                  borderRadius: '8px',
-                  background: selectedSubmission === sub ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                  border: selectedSubmission === sub ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid var(--border-color)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}
-                onMouseEnter={(e) => { if (selectedSubmission !== sub) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)' }}
-                onMouseLeave={(e) => { if (selectedSubmission !== sub) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)' }}
+                className={selectedSubmission === sub ? styles.itemSelected : styles.item}
               >
                 {/* Left: Website Logo */}
-                <div style={{ width: '32px', height: '32px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className={styles.itemLogo}>
                   <WebsiteLogo website={sub['網站']} />
                 </div>
 
                 {/* Middle: Time and Task Name */}
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                <div className={styles.itemInfo}>
+                  <span className={styles.itemTime}>
                     {sub['完成時間']}
                   </span>
-                  <span style={{
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}>
+                  <span className={styles.itemName}>
                     {sub['題目名稱'] || `Task ${idx + 1}`}
                   </span>
                 </div>
 
                 {/* Right: Verdict */}
-                <div style={{ flexShrink: 0 }}>
+                <div className={styles.itemVerdictWrapper}>
                   <span
-                    style={{
-                      color: getVerdictColor(sub['結果']),
-                      fontWeight: 600,
-                      fontFamily: 'monospace',
-                      fontSize: '1.2rem'
-                    }}
+                    className={styles.itemVerdict}
+                    style={{ '--verdict-color': getVerdictColor(sub['結果']) } as React.CSSProperties}
                   >
                     {sub['結果']}
                   </span>
@@ -168,16 +148,16 @@ export default function SearchSubmissions({ selectedSubmission, onSelect }: Sear
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '24px' }}>
+          <div className={styles.emptyState}>
             No submissions found.
           </div>
         )}
       </div>
 
       {/* Bottom Filter & Hint */}
-      <div style={{ flexShrink: 0, marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div className={styles.bottomArea}>
         {hasMore && (
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+          <div className={styles.overflowHint}>
             顯示超過 20 筆結果，請增加更多篩選條件
           </div>
         )}
@@ -186,15 +166,7 @@ export default function SearchSubmissions({ selectedSubmission, onSelect }: Sear
           placeholder="Search Task Name..."
           value={taskNameFilter}
           onChange={e => setTaskNameFilter(e.target.value)}
-          style={{
-            padding: '10px 12px',
-            borderRadius: '6px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-primary)',
-            width: '100%',
-            outline: 'none'
-          }}
+          className={styles.searchInput}
         />
       </div>
     </div>

@@ -1,0 +1,34 @@
+/* WebsiteDistributionChart Module */
+
+.errorMessage {
+  color: var(--color-wa);
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.card {
+  min-height: 300px;
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 100%;
+}
+
+/* foreignObject label in pie chart */
+.pieLabel {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--label-color);
+  gap: 8px;
+}
+
+.pieLabelLogo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}

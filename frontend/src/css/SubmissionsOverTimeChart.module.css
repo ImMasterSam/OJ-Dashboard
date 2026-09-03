@@ -1,0 +1,167 @@
+/* SubmissionsOverTimeChart Module */
+
+/* Custom Tooltip */
+.tooltip {
+  background-color: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--text-primary);
+  min-width: 160px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.tooltipDate {
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tooltipSites {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tooltipSiteRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tooltipSiteLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tooltipSiteDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--dot-color);
+}
+
+.tooltipSiteName {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.tooltipSiteCount {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tooltipEmpty {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.tooltipTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.tooltipTotalLabel {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.tooltipTotalValue {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--total-color);
+}
+
+/* Main card */
+.card {
+  grid-column: span 8;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chart header */
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chartHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.chartTitle {
+  margin: 0;
+}
+
+/* Toggle button group */
+.toggleGroup {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toggleBtn {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggleBtn:last-child {
+  border-left: 1px solid var(--border-color);
+}
+
+.toggleBtnActive {
+  composes: toggleBtn;
+  background: var(--surface-color-hover, #666769);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Total submissions display */
+.totalDisplay {
+  text-align: right;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.totalNumber {
+  font-size: 3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.totalLabel {
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+}
+
+/* Chart container */
+.chartContainer {
+  flex-grow: 1;
+  min-height: 300px;
+}
+
+/* Error state */
+.error {
+  grid-column: span 8;
+}

@@ -1,10 +1,11 @@
-.kpi-cards-container {
+/* KPI Cards Module */
+.container {
   display: flex;
   gap: 16px;
   margin-bottom: 0;
 }
 
-.kpi-card {
+.card {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -14,9 +15,11 @@
   position: relative;
   overflow: hidden;
   min-width: 120px;
+  border-top: 4px solid var(--card-color);
+  min-width: 200px;
 }
 
-.kpi-card-glow {
+.glow {
   position: absolute;
   top: 0;
   left: 0;
@@ -24,15 +27,17 @@
   height: 20px;
   opacity: 0.5;
   pointer-events: none;
+  background: linear-gradient(180deg, var(--card-color-alpha) 0%, transparent 100%);
 }
 
-.kpi-card-value {
+.value {
   font-size: 1.75rem;
   font-weight: 600;
   line-height: 1.2;
+  color: var(--card-color);
 }
 
-.kpi-card-label {
+.label {
   font-size: 0.875rem;
   color: var(--text-primary);
   font-weight: 600;
