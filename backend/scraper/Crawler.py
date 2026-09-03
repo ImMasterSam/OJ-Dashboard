@@ -136,7 +136,7 @@ class ZerojudgeFetcher(OnlineJudgeFetcher):
         # chrome_options.add_argument('--user-data-dir=C:/Users/USER/AppData/Local/Google/Chrome/User Data') # 使用 Chrome 的使用者資料
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
 
         # 啟動 Webdriver
         try:
@@ -155,22 +155,36 @@ class ZerojudgeFetcher(OnlineJudgeFetcher):
         username.send_keys(self.config['Username'])
         password.send_keys(self.config['Password'])
         loginButton = browser.find_element(By.XPATH,'/html/body/div[3]/div/div/div/div[2]/form/button[1]')
-        sleep(3)
+        
+        print("=========================================================")
+        print("若遇到 Zerojudge 的 reCAPTCHA 驗證，請手動在彈出的瀏覽器中完成。")
+        print("程式將會等待您完成驗證並登入後自動繼續 (最多等待 2 分鐘)...")
+        print("=========================================================")
+        
+        sleep(1)
         loginButton.click()
 
         # 可以用 Chrome 的資料直接用 Google 登入 (現在暫時不需要)
         # Google = browser.find_element(By.XPATH,'/html[1]/body[1]/div[4]/div[2]/div[2]/a[1]')
         # Google.click()
 
-        sleep(3)  # 等待頁面載入
-
-        # 檢查是否登入成功
-        if browser.current_url == "https://zerojudge.tw/Login":
+        # 等待頁面跳轉 (離開 Login 頁面) 或逾時
+        timeout = 120
+        elapsed = 0
+        while "Login" in browser.current_url:
             sleep(2)
-            error_message = browser.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[2]/form/div[1]').text
-            print(f"ERROR: Unable to login Zerojudge !!! ({error_message})")
-            logging.error(f"Unable to login Zerojudge !!! ({error_message})")
-            raise ValueError(f"Unable to login Zerojudge !!! ({error_message})")
+            elapsed += 2
+            if elapsed >= timeout:
+                try:
+                    error_message = browser.find_element(By.XPATH, '/html/body/div[3]/div/div/div/div[2]/form/div[1]').text
+                except Exception:
+                    error_message = "無法登入且未取得錯誤訊息"
+                
+                error_msg = f"登入 Zerojudge 逾時 (超過 2 分鐘)，最後狀態: {error_message}"
+                print(f"ERROR: {error_msg}")
+                logging.error(error_msg)
+                browser.quit()
+                raise TimeoutError(error_msg)
 
         # 進入使用者解題統計頁面（確保 cookie 完整）
         browser.get("https://zerojudge.tw/UserStatistic")
