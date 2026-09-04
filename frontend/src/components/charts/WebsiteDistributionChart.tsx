@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useSubsData } from '../../hooks/useSubsData';
 import { WebsiteDistributionSkeleton } from '../ChartPlaceholders';
@@ -16,6 +16,8 @@ const CELL_STYLE_BASE = {
   transition: 'all 0.1s ease'
 };
 
+const getLogoPath = (name: string) => `./OJ logos/${name}.png`;
+
 const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, fill }: any) => {
   if (percent < 0.05) return null;
   const RADIAN = Math.PI / 180;
@@ -29,10 +31,6 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, f
 
   const isRight = cos >= 0;
   const ex = mx + (isRight ? 1 : -1) * 15;
-
-  const getLogoPath = (name: string) => {
-    return `./OJ logos/${name}.png`;
-  };
 
   const fWidth = 250;
   const fHeight = 40;
@@ -58,8 +56,55 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, f
   );
 };
 
+const renderMobileLabel = ({ cx, cy, midAngle, outerRadius, percent, name, fill }: any) => {
+  if (percent < 0.08) return null;
+  const RADIAN = Math.PI / 180;
+  const sin = Math.sin(-midAngle * RADIAN);
+  const cos = Math.cos(-midAngle * RADIAN);
+
+  const sx = cx + (outerRadius) * cos;
+  const sy = cy + (outerRadius) * sin;
+  const mx = cx + (outerRadius * 1.15) * cos;
+  const my = cy + (outerRadius * 1.15) * sin;
+
+  const isRight = cos >= 0;
+  const ex = mx + (isRight ? 1 : -1) * 10;
+
+  const fWidth = 150;
+  const fHeight = 28;
+  const fX = isRight ? ex + 4 : ex - fWidth - 4;
+  const fY = my - fHeight / 2;
+
+  return (
+    <g>
+      <path d={`M${sx},${sy} L${mx},${my} L${ex},${my}`} stroke={fill} fill="none" strokeWidth={2} />
+      <foreignObject x={fX} y={fY} width={fWidth} height={fHeight}>
+        <div
+          className={styles.pieLabelMobile}
+          style={{
+            justifyContent: isRight ? 'flex-start' : 'flex-end',
+            '--label-color': fill,
+          } as React.CSSProperties}
+        >
+          <img src={getLogoPath(name)} alt={name} className={styles.pieLabelLogoMobile} />
+          <span>{`${name} (${(percent * 100).toFixed(0)}%)`}</span>
+        </div>
+      </foreignObject>
+    </g>
+  );
+};
+
 export default function WebsiteDistributionChart() {
   const { rawData, loading, error, selectedWebsite, selectedVerdict, setWebsiteFilter } = useSubsData();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const chartData = useMemo(() => {
     if (!rawData) return [];
@@ -108,7 +153,7 @@ export default function WebsiteDistributionChart() {
               paddingAngle={2}
               dataKey="value"
               stroke="none"
-              label={renderCustomizedLabel}
+              label={isMobile ? renderMobileLabel : renderCustomizedLabel}
               labelLine={false}
             >
               {chartData.map((entry, index) => {
@@ -135,6 +180,7 @@ export default function WebsiteDistributionChart() {
               contentStyle={TOOLTIP_CONTENT_STYLE}
               itemStyle={TOOLTIP_ITEM_STYLE}
             />
+
           </PieChart>
         </ResponsiveContainer>
       </div>

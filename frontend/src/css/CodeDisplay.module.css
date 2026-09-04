@@ -23,6 +23,35 @@
   align-items: center;
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backButton {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.backButton:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .backButton {
+    display: flex;
+  }
+}
+
 .headerTitle {
   font-weight: 600;
   color: #FFFFFF;

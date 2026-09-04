@@ -64,7 +64,7 @@ export default function RecentSubmissionsCard({ className = '' }: { className?: 
         </div>
       ) : (
         <div className="recent-subs-container">
-          <table className="recent-subs-table">
+          <table className={`recent-subs-table ${styles.desktopTable}`}>
             <thead>
               <tr>
                 <th className={styles.headerCellNarrow}>解題網站</th>
@@ -106,6 +106,41 @@ export default function RecentSubmissionsCard({ className = '' }: { className?: 
               ))}
             </tbody>
           </table>
+          <div className={styles.mobileList}>
+            {recentSubs.map((sub, idx) => (
+              <a 
+                key={`mobile-${sub['題目名稱']}-${sub['完成時間']}-${idx}`}
+                href={sub['網址']}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.mobileCard}
+              >
+                <div className={styles.mobileLogo}>
+                  <img
+                    src={`./OJ logos/${sub['網站']}.png`}
+                    alt={sub['網站']}
+                    title={sub['網站']}
+                  />
+                </div>
+                <div className={styles.mobileInfo}>
+                  <span className={styles.mobileTime}>
+                    {formatDate(sub['完成時間'])}
+                  </span>
+                  <span className={styles.mobileTitle}>
+                    {sub['題目名稱']}
+                  </span>
+                </div>
+                <div className={styles.mobileVerdictWrapper}>
+                  <span 
+                    className={styles.mobileVerdict} 
+                    style={{ '--verdict-color': getVerdictColor(sub['結果']) } as React.CSSProperties}
+                  >
+                    {sub['結果']}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </div>

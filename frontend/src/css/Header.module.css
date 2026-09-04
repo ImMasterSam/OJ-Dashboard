@@ -1,5 +1,6 @@
 /* Header Module */
 .header {
+  background-color: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -27,10 +28,14 @@
 }
 
 .header h1 {
-  font-size: 2.5rem;
+  font-size: var(--font-size-h1);
   font-weight: 600;
   margin: 0;
   letter-spacing: -0.02em;
+}
+
+.headerControls {
+  width: 100%;
 }
 
 .headerCenter {
@@ -65,4 +70,59 @@
 
 .segmentedControlWrapper {
   margin-top: 4px;
+  min-width: 250px;
+}
+
+/* Media Queries for Header */
+@media (max-width: 768px) {
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "logo github"
+      "controls controls"
+      "kpi kpi";
+    gap: 16px;
+    align-items: center;
+  }
+
+  .headerLeft {
+    display: contents;
+  }
+
+  .headerLogoTitle {
+    grid-area: logo;
+  }
+
+  .headerControls {
+    grid-area: controls;
+    width: 100%;
+  }
+
+  .segmentedControlWrapper {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .headerCenter {
+    grid-area: kpi;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .headerRight {
+    grid-area: github;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerLogo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .githubLink img {
+    width: 36px;
+    height: 36px;
+  }
 }

@@ -165,3 +165,29 @@
 .error {
   grid-column: span 8;
 }
+
+@media (max-width: 768px) {
+  .card {
+    grid-column: 1 / -1;
+  }
+
+  .error {
+    grid-column: 1 / -1;
+  }
+
+  .chartHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .chartHeaderLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .totalDisplay {
+    align-self: flex-start;
+  }
+}

@@ -4,6 +4,7 @@ import styles from '../../css/CodeDisplay.module.css';
 
 interface CodeDisplayProps {
   submission: any;
+  onBack?: () => void;
 }
 
 const LANGUAGE_MAP: Record<string, string> = {
@@ -58,13 +59,20 @@ const decodeHtmlEntities = (str: string) => {
     .replace(/&amp;/g, '&');
 };
 
-export default function CodeDisplay({ submission }: CodeDisplayProps) {
+export default function CodeDisplay({ submission, onBack }: CodeDisplayProps) {
   return (
     <div className={`glass-card col-span-8 ${styles.container}`}>
       <div className={styles.header}>
-        <span className={styles.headerTitle}>
-          {submission ? submission['題目名稱'] : 'Select a submission'}
-        </span>
+        <div className={styles.headerLeft}>
+          {onBack && (
+            <button className={styles.backButton} onClick={onBack} title="返回列表">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+          )}
+          <span className={styles.headerTitle}>
+            {submission ? submission['題目名稱'] : 'Select a submission'}
+          </span>
+        </div>
         {submission && submission['程式語言'] && (
           <span className={styles.languageBadge}>
             {submission['程式語言']}

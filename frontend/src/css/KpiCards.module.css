@@ -14,9 +14,8 @@
   padding: 12px 24px;
   position: relative;
   overflow: hidden;
-  min-width: 120px;
-  border-top: 4px solid var(--card-color);
   min-width: 200px;
+  border-top: 4px solid var(--card-color);
 }
 
 .glow {
@@ -31,7 +30,7 @@
 }
 
 .value {
-  font-size: 1.75rem;
+  font-size: var(--font-size-display-number);
   font-weight: 600;
   line-height: 1.2;
   color: var(--card-color);
@@ -42,4 +41,16 @@
   color: var(--text-primary);
   font-weight: 600;
   margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    gap: 12px;
+    width: 100%;
+  }
+
+  .card {
+    min-width: 0;
+    padding: 8px 12px;
+  }
 }

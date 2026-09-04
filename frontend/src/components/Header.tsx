@@ -16,21 +16,23 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
             Online Judge 解題統計
           </h1>
         </div>
-
+        
         {setActiveTab && activeTab && (
-          <div className={`segmented-control ${styles.segmentedControlWrapper}`}>
-            <button
-              className={`segmented-control-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); setActiveTab('dashboard'); }}
-            >
-              Dashboard
-            </button>
-            <button
-              className={`segmented-control-btn ${activeTab === 'source-code' ? 'active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); setActiveTab('source-code'); }}
-            >
-              Source Code
-            </button>
+          <div className={styles.headerControls}>
+            <div className={`segmented-control ${styles.segmentedControlWrapper}`}>
+              <button
+                className={`segmented-control-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); setActiveTab('dashboard'); }}
+              >
+                Dashboard
+              </button>
+              <button
+                className={`segmented-control-btn ${activeTab === 'source-code' ? 'active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); setActiveTab('source-code'); }}
+              >
+                Source Code
+              </button>
+            </div>
           </div>
         )}
       </div>

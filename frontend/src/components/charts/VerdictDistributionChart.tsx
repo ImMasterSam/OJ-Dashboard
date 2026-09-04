@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useSubsData } from '../../hooks/useSubsData';
 import { VerdictDistributionSkeleton } from '../ChartPlaceholders';
@@ -48,7 +48,37 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, f
         fill={fill}
         textAnchor={cos >= 0 ? 'start' : 'end'}
         dominantBaseline="central"
-        fontSize={20}
+        fontSize={16}
+        fontWeight="bold"
+      >
+        {`${name} (${(percent * 100).toFixed(0)}%)`}
+      </text>
+    </g>
+  );
+};
+
+const renderMobileLabel = ({ cx, cy, midAngle, outerRadius, percent, name, fill }: any) => {
+  if (percent < 0.08) return null;
+  const RADIAN = Math.PI / 180;
+  const sin = Math.sin(-midAngle * RADIAN);
+  const cos = Math.cos(-midAngle * RADIAN);
+
+  const sx = cx + (outerRadius) * cos;
+  const sy = cy + (outerRadius) * sin;
+  const mx = cx + (outerRadius * 1.15) * cos;
+  const my = cy + (outerRadius * 1.15) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 10;
+
+  return (
+    <g>
+      <path d={`M${sx},${sy} L${mx},${my} L${ex},${my}`} stroke={fill} fill="none" strokeWidth={2} />
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 4}
+        y={my}
+        fill={fill}
+        textAnchor={cos >= 0 ? 'start' : 'end'}
+        dominantBaseline="central"
+        fontSize={12}
         fontWeight="bold"
       >
         {`${name} (${(percent * 100).toFixed(0)}%)`}
@@ -59,6 +89,15 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, f
 
 export default function VerdictDistributionChart() {
   const { rawData, loading, error, selectedWebsite, selectedVerdict, setVerdictFilter } = useSubsData();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const chartData = useMemo(() => {
     if (!rawData) return [];
@@ -107,7 +146,7 @@ export default function VerdictDistributionChart() {
               paddingAngle={2}
               dataKey="value"
               stroke="none"
-              label={renderCustomizedLabel}
+              label={isMobile ? renderMobileLabel : renderCustomizedLabel}
               labelLine={false}
             >
               {chartData.map((entry, index) => {
