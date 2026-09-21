@@ -378,14 +378,22 @@ class TOJFetcher(OnlineJudgeFetcher):
             raise WebDriverException
 
         result_d = {
-            "Accepted":"AC",
-            "Wrong Answer":"WA",
-            "Partial Correct": "WA",
-            "Compile Error":"CE", 
-            "Runtime Error":"RE", 
-            "Time Limit Exceed":"TLE", 
-            "Memory Limit Exceed":"MLE",
-            "Runtime Error (Killed by signal)" : "RE"
+            "state-text-1": "AC",
+            "state-text-2": "WA",
+            "state-text-3": "WA",
+            "state-text-4": "RE",
+            "state-text-5": "RE",
+            "state-text-6": "TLE",
+            "state-text-7": "MLE",
+            "state-text-8": "OLE",
+            "state-text-9": "CE",
+            "state-text-10": "CE",
+            "state-text-11": "CE",
+            "state-text-12": "CE",
+            "state-text-100": "WA",
+            "state-text-101": "WA",
+            "state-text-102": "WA",
+            "state-text-103": "WA",
         }
         raw_data = list()
 
@@ -419,7 +427,13 @@ class TOJFetcher(OnlineJudgeFetcher):
                 title = proset_d[id]
                 time = tds[-1].text
                 lang = "C++"
-                result = result_d[tds[3].text]
+                
+                state_class = ""
+                for cls in tds[3].get_attribute("class").split():
+                    if cls.startswith("state-text-"):
+                        state_class = cls
+                        break
+                result = result_d.get(state_class, "WA")
 
                 raw_data.append(Submission(
                     題目名稱=title,
