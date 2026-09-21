@@ -21,6 +21,8 @@ Running = True
 
 if __name__ == "__main__":
 
+    os.makedirs('logs', exist_ok=True)
+    
     logging.basicConfig(level = logging.INFO,
                         format = '[%(levelname)s] %(asctime)s: %(message)s',
                         datefmt = '%Y/%m/%d %H:%M:%S',
