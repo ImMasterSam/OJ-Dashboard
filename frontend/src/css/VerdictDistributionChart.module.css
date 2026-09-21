@@ -1,0 +1,16 @@
+/* VerdictDistributionChart Module */
+
+.errorMessage {
+  color: var(--color-wa);
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.card {
+  min-height: 300px;
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 100%;
+}

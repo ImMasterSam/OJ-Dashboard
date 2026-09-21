@@ -1,0 +1,128 @@
+/* Header Module */
+.header {
+  background-color: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.headerLogoTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.header h1 {
+  font-size: var(--font-size-h1);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.headerControls {
+  width: 100%;
+}
+
+.headerCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.githubLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 50%;
+  background: rgba(26, 29, 40, 0.4);
+  border: 1px solid var(--border-color);
+}
+
+.githubLink:hover {
+  color: var(--text-primary);
+  background: rgba(26, 29, 40, 0.8);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px var(--border-glow);
+}
+
+.segmentedControlWrapper {
+  margin-top: 4px;
+  min-width: 250px;
+}
+
+/* Media Queries for Header */
+@media (max-width: 768px) {
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "logo github"
+      "controls controls"
+      "kpi kpi";
+    gap: 16px;
+    align-items: center;
+  }
+
+  .headerLeft {
+    display: contents;
+  }
+
+  .headerLogoTitle {
+    grid-area: logo;
+  }
+
+  .headerControls {
+    grid-area: controls;
+    width: 100%;
+  }
+
+  .segmentedControlWrapper {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .headerCenter {
+    grid-area: kpi;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .headerRight {
+    grid-area: github;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerLogo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .githubLink img {
+    width: 36px;
+    height: 36px;
+  }
+}

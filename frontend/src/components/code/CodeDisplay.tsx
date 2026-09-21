@@ -1,8 +1,10 @@
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import styles from '../../css/CodeDisplay.module.css';
 
 interface CodeDisplayProps {
   submission: any;
+  onBack?: () => void;
 }
 
 const LANGUAGE_MAP: Record<string, string> = {
@@ -57,75 +59,45 @@ const decodeHtmlEntities = (str: string) => {
     .replace(/&amp;/g, '&');
 };
 
-export default function CodeDisplay({ submission }: CodeDisplayProps) {
+export default function CodeDisplay({ submission, onBack }: CodeDisplayProps) {
   return (
-    <div className="glass-card code-card col-span-8 flex flex-col h-full overflow-hidden">
-      <div className="code-header border-b border-white/10 p-4 bg-white/5 flex justify-between items-center">
-        <span className="font-semibold text-white">
-          {submission ? submission['題目名稱'] : 'Select a submission'}
-        </span>
+    <div className={`glass-card col-span-8 ${styles.container}`}>
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          {onBack && (
+            <button className={styles.backButton} onClick={onBack} title="返回列表">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+          )}
+          <span className={styles.headerTitle}>
+            {submission ? submission['題目名稱'] : 'Select a submission'}
+          </span>
+        </div>
         {submission && submission['程式語言'] && (
-          <span className="text-xs font-mono bg-white/10 px-2 py-1 rounded text-white/70">
+          <span className={styles.languageBadge}>
             {submission['程式語言']}
           </span>
         )}
       </div>
 
-      <div className="flex-1 bg-[#1e1e1e]/50" style={{ overflow: 'auto' }}>
+      <div className={styles.body}>
         {!submission ? (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            color: 'rgba(255, 255, 255, 0.4)',
-            fontSize: '1.1rem',
-            padding: '24px'
-          }}>
+          <div className={styles.placeholder}>
             <p>請選擇一個提交紀錄以檢視程式碼</p>
           </div>
         ) : !submission['Code'] ? (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            padding: '3rem',
-            textAlign: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
-            color: 'rgba(255, 255, 255, 0.5)'
-          }}>
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              padding: '1.25rem',
-              borderRadius: '50%',
-              marginBottom: '1.5rem',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-            }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8, color: '#a0a0a0' }}>
+          <div className={styles.unsupported}>
+            <div className={styles.unsupportedIcon}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={styles.unsupportedIconSvg}>
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
               </svg>
             </div>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: 500,
-              color: 'rgba(255, 255, 255, 0.85)',
-              marginBottom: '0.75rem',
-              letterSpacing: '0.5px'
-            }}>
+            <h3 className={styles.unsupportedTitle}>
               此平台暫不支援程式碼檢視
             </h3>
-            <p style={{
-              fontSize: '0.9rem',
-              color: 'rgba(255, 255, 255, 0.4)',
-              maxWidth: '380px',
-              lineHeight: '1.6'
-            }}>
-              很抱歉，目前系統僅開放讀取 <strong style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Zerojudge、LeetCode</strong> 的提交原始碼，其他評測平台暫未提供存取權限。
+            <p className={styles.unsupportedText}>
+              很抱歉，目前系統僅開放讀取 <strong className={styles.unsupportedHighlight}>Zerojudge、LeetCode</strong> 的提交原始碼，其他評測平台暫未提供存取權限。
             </p>
           </div>
         ) : (

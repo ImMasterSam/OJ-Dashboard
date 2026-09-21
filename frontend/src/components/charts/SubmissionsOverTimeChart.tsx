@@ -11,6 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
+import styles from '../../css/SubmissionsOverTimeChart.module.css';
 
 const CustomTooltip = ({ active, payload, label, isCumulative }: any) => {
   if (active && payload && payload.length) {
@@ -25,38 +26,36 @@ const CustomTooltip = ({ active, payload, label, isCumulative }: any) => {
       .sort((a, b) => b[1] - a[1]);
 
     return (
-      <div style={{
-        backgroundColor: 'var(--bg-surface)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid var(--border-color)',
-        borderRadius: '8px',
-        padding: '12px',
-        color: 'var(--text-primary)',
-        minWidth: '160px',
-        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
-      }}>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border-color)' }}>
+      <div className={styles.tooltip}>
+        <div className={styles.tooltipDate}>
           {dateLabel}
         </div>
         {sites.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+          <div className={styles.tooltipSites}>
             {sites.map(([site, count]) => (
-              <div key={site} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: COLORS[site] || '#8E44AD' }} />
-                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{site}</span>
+              <div key={site} className={styles.tooltipSiteRow}>
+                <div className={styles.tooltipSiteLabel}>
+                  <div
+                    className={styles.tooltipSiteDot}
+                    style={{ '--dot-color': COLORS[site] || '#8E44AD' } as React.CSSProperties}
+                  />
+                  <span className={styles.tooltipSiteName}>{site}</span>
                 </div>
-                <span style={{ fontSize: '14px', fontWeight: 600 }}>{count}</span>
+                <span className={styles.tooltipSiteCount}>{count}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '10px' }}>無提交紀錄</div>
+          <div className={styles.tooltipEmpty}>無提交紀錄</div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--border-color)' }}>
-          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>總計</span>
-          <span style={{ fontSize: '16px', fontWeight: 'bold', color: isCumulative ? '#10b981' : '#3b82f6' }}>{totalCount}</span>
+        <div className={styles.tooltipTotal}>
+          <span className={styles.tooltipTotalLabel}>總計</span>
+          <span
+            className={styles.tooltipTotalValue}
+            style={{ '--total-color': isCumulative ? '#10b981' : '#3b82f6' } as React.CSSProperties}
+          >
+            {totalCount}
+          </span>
         </div>
       </div>
     );
@@ -147,7 +146,7 @@ export default function SubmissionsOverTimeChart() {
     return <HistoricalSubmissionsSkeleton />;
   }
   if (error) {
-    return <div className="chart-card dashboard-item error" style={{ gridColumn: 'span 8' }}>Error: {error}</div>;
+    return <div className={`chart-card dashboard-item ${styles.error}`}>Error: {error}</div>;
   }
 
   const dataSource = filteredData || rawData;
@@ -155,52 +154,35 @@ export default function SubmissionsOverTimeChart() {
   const isCumulative = viewMode === 'cumulative';
 
   return (
-    <div className="chart-card dashboard-item" style={{ gridColumn: 'span 8', display: 'flex', flexDirection: 'column' }}>
-      <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <h2 className="chart-title" style={{ margin: 0 }}>歷年提交量</h2>
-          <div style={{ display: 'flex', border: '1px solid var(--border-color)', borderRadius: '6px', overflow: 'hidden' }}>
+    <div className={`chart-card dashboard-item ${styles.card}`}>
+      <div className={styles.chartHeader}>
+        <div className={styles.chartHeaderLeft}>
+          <h2 className={`chart-title ${styles.chartTitle}`}>歷年提交量</h2>
+          <div className={styles.toggleGroup}>
             <button
               onClick={(e) => { e.stopPropagation(); setViewMode('monthly'); }}
-              style={{
-                padding: '6px 12px',
-                border: 'none',
-                background: !isCumulative ? 'var(--surface-color-hover, #666769)' : 'transparent',
-                color: !isCumulative ? 'var(--text-primary)' : 'var(--text-secondary)',
-                fontWeight: !isCumulative ? 600 : 400,
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
+              className={!isCumulative ? styles.toggleBtnActive : styles.toggleBtn}
             >
               單月
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setViewMode('cumulative'); }}
-              style={{
-                padding: '6px 12px',
-                border: 'none',
-                borderLeft: '1px solid var(--border-color)',
-                background: isCumulative ? 'var(--surface-color-hover, #666769)' : 'transparent',
-                color: isCumulative ? 'var(--text-primary)' : 'var(--text-secondary)',
-                fontWeight: isCumulative ? 600 : 400,
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
+              className={isCumulative ? styles.toggleBtnActive : styles.toggleBtn}
             >
               累計
             </button>
           </div>
         </div>
-        <div style={{ textAlign: 'right', display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-          <span style={{ fontSize: '3rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1 }}>
+        <div className={styles.totalDisplay}>
+          <span className={styles.totalNumber}>
             {totalSubmissions.toLocaleString()}
           </span>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '1.25rem' }}>
+          <span className={styles.totalLabel}>
             總提交量
           </span>
         </div>
       </div>
-      <div className="chart-container" style={{ flexGrow: 1, minHeight: '300px' }}>
+      <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
